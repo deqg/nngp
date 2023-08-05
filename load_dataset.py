@@ -27,8 +27,15 @@ from __future__ import print_function
 
 import copy
 import numpy as np
-import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
+import tensorflow.compat.v1 as tf
+import tensorflow_datasets as tfds
+# import tensorflow as tf
+# from tensorflow.examples.tutorials.mnist import input_data
+
+# Change the dataloader using recent version of tensorflow dataset
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+x_valid, x_train = x_train[:10000], x_train[10000:]
+y_valid, y_train = y_train[:10000], y_train[10000:]
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -43,8 +50,19 @@ def load_mnist(num_train=50000,
   """Loads MNIST as numpy array."""
 
   data_dir = FLAGS.data_dir
-  datasets = input_data.read_data_sets(
-      data_dir, False, validation_size=10000, one_hot=True)
+
+  class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+  datasets = dotdict({'train':{'images':x_train, 'labels':y_train},
+                     'valid':{'images':x_valid, 'labels':y_valid}
+                     'test':{'images':x_test, 'labels':y_test}})
+
+  # datasets = input_data.read_data_sets(
+  #     data_dir, False, validation_size=10000, one_hot=True)
   mnist_data = _select_mnist_subset(
       datasets,
       num_train,
