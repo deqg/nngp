@@ -279,8 +279,8 @@ class NNGPKernel(object):
       batch_size: int, size of each batch
       batch_count: int, number of batches
     """
-    input1_size = input1.shape[0].value
-    input2_size = input2.shape[0].value
+    input1_size = input1.shape[0]#.value
+    input2_size = input2.shape[0]#.value
 
     batch_size = min(np.iinfo(np.int32).max //
                      (FLAGS.fraction_of_int32 * input2_size), input1_size)
