@@ -77,7 +77,8 @@ def _get_interp_idxs_weights_2d(x, xp, y, yp, x_log_spacing=False):
     ind_grid = (xyp - xy0) / spacing
     ind = tf.cast(ind_grid, tf.int32) + [[[0], [1]]]
 
-    max_ind = [[[x.shape[0].value - 1]], [[y.shape[0].value - 1]]]
+    max_ind = [[[x.shape[0] - 1]], [[y.shape[0] - 1]]]
+    # max_ind = [[[x.shape[0].value - 1]], [[y.shape[0].value - 1]]]
     ind = tf.minimum(ind, max_ind)
     ind_float = tf.cast(ind, tf.float64)
 
