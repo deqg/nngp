@@ -217,7 +217,6 @@ class NNGPKernel(object):
         batch_size, batch_count = self._get_batch_size_and_count(input1, input2)
         with tf.name_scope("q_ab"):
           q_ab_all = []
-          print(batch_count)
           for b_x in range(batch_count):
             input1_batch = input1[batch_size * b_x : batch_size * (b_x + 1), :] ## Not sure whether the code works when batch_count >1
             input2_batch = input2[batch_size * b_x : batch_size * (b_x + 1), :]
