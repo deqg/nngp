@@ -110,6 +110,8 @@ def _select_mnist_subset(datasets,
     np.random.shuffle(idx_list)
 
   data_precision = np.float64 if use_float64 else np.float32
+  print(idx_list)
+  print(subset.train.images.shape)
 
   train_image = subset.train.images[idx_list][:num_train].astype(data_precision)
   train_label = subset.train.labels[idx_list][:num_train].astype(data_precision)
