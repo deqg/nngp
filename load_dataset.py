@@ -58,7 +58,7 @@ def load_mnist(num_train=50000,
     __delattr__ = dict.__delitem__
 
   datasets = dotdict({'train':{'images':x_train, 'labels':y_train},
-                     'valid':{'images':x_valid, 'labels':y_valid}
+                     'valid':{'images':x_valid, 'labels':y_valid},
                      'test':{'images':x_test, 'labels':y_test}})
 
   # datasets = input_data.read_data_sets(
