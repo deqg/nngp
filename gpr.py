@@ -42,6 +42,7 @@ class GaussianProcessRegression(object):
     with tf.name_scope("init"):
       self.input_x = input_x
       self.output_y = output_y
+      print(input_x.shape)
       self.num_train, self.input_dim = input_x.shape
       _, self.output_dim = output_y.shape
 
