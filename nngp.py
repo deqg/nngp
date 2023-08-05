@@ -211,7 +211,7 @@ class NNGPKernel(object):
 
       q_ab = cov_init
       print(q_ab.shape)
-      print(self.bias_var.shape)
+      print(self.bias_var)
       print(cov_init.shape)
       q_ab = self.weight_var * q_ab + self.bias_var * cov_init # ADD cov(X,X') 
       corr = q_ab / q_aa_init[0]
