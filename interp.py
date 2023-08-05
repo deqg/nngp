@@ -38,7 +38,7 @@ def interp_lin(x, y, xp, log_spacing=False):
     grid = (xp - x[0]) / spacing
     ind1 = tf.cast(grid, tf.int32)
     ind2 = ind1 + 1
-    max_ind = x.shape[0].value
+    max_ind = x.shape[0] #.value
     # set top and bottom indices identical if extending past end of range
     ind2 = tf.minimum(max_ind - 1, ind2)
 
