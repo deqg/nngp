@@ -38,6 +38,7 @@ import tensorflow.compat.v1 as tf
 import gpr
 import load_dataset
 import nngp
+import utils
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -73,13 +74,13 @@ flags.DEFINE_integer('max_gauss', 10,
                      'Range for gaussian integration.')
 
 
-def set_default_hparams():
-  hparams = {nonlinearity: "tanh",
-             weight_var: 0.2,
-             bias_var: 0.2,
-             depth: 2}
+def set_default_hparams(hparams):
+  # hparams = {nonlinearity: "tanh",
+  #            weight_var: 0.2,
+  #            bias_var: 0.2,
+  #            depth: 2}
 
-  return hparams #tf.contrib.training.HParams(
+  return utils.create_hparams(hparams) #tf.contrib.training.HParams(
       #nonlinearity='tanh', weight_var=1.3, bias_var=0.2, depth=2)
 
 
