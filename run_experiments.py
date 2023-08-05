@@ -81,7 +81,7 @@ def set_default_hparams(hparams):
   #            bias_var: 0.2,
   #            depth: 2}
 
-  return utils.create_hparam(hparams) #hp.HParam({'nonlinearity':'tanh', 'weight_var':1.3, 'bias_var':0.2, 'depth':2})
+  return utils.create_hparams(hparams) #hp.HParam({'nonlinearity':'tanh', 'weight_var':1.3, 'bias_var':0.2, 'depth':2})
       #tf.contrib.training.HParams(
       #nonlinearity='tanh', weight_var=1.3, bias_var=0.2, depth=2)
 
