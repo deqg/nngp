@@ -230,7 +230,7 @@ def run_nngp_eval(hparams, run_dir):
 
 def main(argv):
   del argv  # Unused
-  hparams = set_default_hparams().parse(FLAGS.hparams)
+  hparams = set_default_hparams(FLAGS.hparams) #.parse(FLAGS.hparams)
   run_nngp_eval(hparams, FLAGS.experiment_dir)
 
 
