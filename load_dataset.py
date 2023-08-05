@@ -57,9 +57,9 @@ def load_mnist(num_train=50000,
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
-  datasets = dotdict({'train':{'images':x_train, 'labels':y_train},
-                     'valid':{'images':x_valid, 'labels':y_valid},
-                     'test':{'images':x_test, 'labels':y_test}})
+  datasets = dotdict({'train':dotdict({'images':x_train, 'labels':y_train}),
+                     'validation':dotdict({'images':x_valid, 'labels':y_valid}),
+                     'test':dotdict({'images':x_test, 'labels':y_test})})
 
   # datasets = input_data.read_data_sets(
   #     data_dir, False, validation_size=10000, one_hot=True)
@@ -84,14 +84,15 @@ def _select_mnist_subset(datasets,
   """Select subset of MNIST and apply preprocessing."""
   np.random.seed(seed)
   digits.sort()
-  subset = copy.deepcopy(datasets)
+  subset = datasets# copy.deepcopy(datasets)
 
   num_class = len(digits)
   num_per_class = num_train // num_class
 
   idx_list = np.array([], dtype='uint8')
+  ys = subset.train.labels
 
-  ys = np.argmax(subset.train.labels, axis=1)  # undo one-hot
+  # ys = np.argmax(subset.train.labels, axis=1)  # undo one-hot
 
   for digit in digits:
     if datasets.train.num_examples == num_train:
