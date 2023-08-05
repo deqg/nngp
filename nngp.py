@@ -205,7 +205,7 @@ class NNGPKernel(object):
     with tf.name_scope("k_full"):
       cov_init = tf.matmul(
           input1, input2, transpose_b=True) / input1.shape[1] #.value
-      print(cov_init.shape, input1.shape)
+      print(cov_init.shape, input1.shape, input2.shape)
       
       self.k_diag(input1)
       q_aa_init = self.layer_qaa_dict[0]
