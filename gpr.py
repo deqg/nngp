@@ -21,7 +21,7 @@ from __future__ import print_function
 
 import time
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
