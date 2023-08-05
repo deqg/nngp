@@ -188,7 +188,7 @@ class NNGPKernel(object):
           current_qaa = samp_qaa
 
       if return_full:
-        qaa = tf.tile(current_qaa[:1], ([input_x.shape[0].value]))
+        qaa = tf.tile(current_qaa[:1], ([input_x.shape[0]])) #([input_x.shape[0].value]))
       else:
         qaa = current_qaa[0]
       return qaa
