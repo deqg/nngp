@@ -33,7 +33,7 @@ import os.path
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import gpr
 import load_dataset
@@ -74,8 +74,13 @@ flags.DEFINE_integer('max_gauss', 10,
 
 
 def set_default_hparams():
-  return tf.contrib.training.HParams(
-      nonlinearity='tanh', weight_var=1.3, bias_var=0.2, depth=2)
+  hparams = {nonlinearity: "tanh",
+             weight_var: 0.2,
+             bias_var: 0.2,
+             depth: 2}
+
+  return hparams #tf.contrib.training.HParams(
+      #nonlinearity='tanh', weight_var=1.3, bias_var=0.2, depth=2)
 
 
 def do_eval(sess, model, x_data, y_data, save_pred=False):
