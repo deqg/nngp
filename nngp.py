@@ -220,6 +220,7 @@ class NNGPKernel(object):
           for b_x in range(batch_count):
             input1_batch = input1[batch_size * b_x : batch_size * (b_x + 1), :]
             input2_batch = input2[batch_size * b_x : batch_size * (b_x + 1), :]
+            print(corr.shape)
             with tf.name_scope("batch_%d" % b_x):
               corr_flat_batch = corr[
                   batch_size * b_x : batch_size * (b_x + 1), :]
@@ -236,6 +237,7 @@ class NNGPKernel(object):
                                               z=self.qab_grid,
                                               xp=q_aa,
                                               yp=corr_flat_batch)
+                  print(q_ab.shape)
 
                   q_ab = self.weight_var * q_ab + self.bias_var * cov_init_batch #ADD cov(X,X')
                   corr_flat_batch = q_ab / self.layer_qaa_dict[l + 1][0]
