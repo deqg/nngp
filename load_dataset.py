@@ -96,9 +96,8 @@ def _select_mnist_subset(datasets,
   num_per_class = num_train // num_class
 
   idx_list = np.array([], dtype='uint8')
-  ys = subset.train.labels
 
-  # ys = np.argmax(subset.train.labels, axis=1)  # undo one-hot
+  ys = np.argmax(subset.train.labels, axis=1)  # undo one-hot
 
   for digit in digits:
     if datasets.train.num_examples == num_train:
