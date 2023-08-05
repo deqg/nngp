@@ -210,9 +210,6 @@ class NNGPKernel(object):
       q_aa_init = self.layer_qaa_dict[0]
 
       q_ab = cov_init
-      print(q_ab.shape)
-      print(self.bias_var)
-      print(cov_init.shape)
       q_ab = self.weight_var * q_ab + self.bias_var * cov_init # ADD cov(X,X') 
       corr = q_ab / q_aa_init[0]
 
@@ -239,8 +236,6 @@ class NNGPKernel(object):
                                               z=self.qab_grid,
                                               xp=q_aa,
                                               yp=corr_flat_batch)
-                  print(q_ab.shape)
-                  print(cov_init_batch.shape)
 
                   q_ab = self.weight_var * q_ab + self.bias_var * cov_init_batch #ADD cov(X,X')
                   corr_flat_batch = q_ab / self.layer_qaa_dict[l + 1][0]
