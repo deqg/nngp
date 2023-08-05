@@ -210,7 +210,7 @@ class NNGPKernel(object):
       q_aa_init = self.layer_qaa_dict[0]
 
       q_ab = cov_init
-      q_ab = self.weight_var * q_ab + self.bias_var
+      q_ab = self.weight_var * q_ab + self.bias_var * cov_init # ADD cov(X,X') 
       corr = q_ab / q_aa_init[0]
 
       if FLAGS.fraction_of_int32 > 1:
@@ -232,7 +232,7 @@ class NNGPKernel(object):
                                               xp=q_aa,
                                               yp=corr_flat_batch)
 
-                  q_ab = self.weight_var * q_ab + self.bias_var
+                  q_ab = self.weight_var * q_ab + self.bias_var * cov_init #ADD cov(X,X')
                   corr_flat_batch = q_ab / self.layer_qaa_dict[l + 1][0]
 
               q_ab_all.append(q_ab)
@@ -249,7 +249,7 @@ class NNGPKernel(object):
                                           z=self.qab_grid,
                                           xp=q_aa,
                                           yp=corr_flat)
-              q_ab = self.weight_var * q_ab + self.bias_var
+              q_ab = self.weight_var * q_ab + self.bias_var * cov_init # ADD cov(X.X')
               corr_flat = q_ab / self.layer_qaa_dict[l+1][0]
             q_ab_all = q_ab
 
