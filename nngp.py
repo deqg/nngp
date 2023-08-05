@@ -105,7 +105,7 @@ class NNGPKernel(object):
     if (FLAGS.use_precomputed_grid and
         tf.gfile.Exists(os.path.join(grid_path, grid_file_name))):
       with tf.gfile.Open(os.path.join(grid_path, grid_file_name), "rb") as f:
-        grid_data_np = np.load(f)
+        grid_data_np = np.load(f,allow_pickle=True,encoding='bytes')
         tf.logging.info("Loaded interpolation grid from %s"%
                         os.path.join(grid_path, grid_file_name))
         grid_data = (tf.convert_to_tensor(grid_data_np[0], dtype=tf.float64),
