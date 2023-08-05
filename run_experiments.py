@@ -111,8 +111,8 @@ def run_nngp_eval(hparams, run_dir):
 
   tf.gfile.MakeDirs(run_dir)
   # Write hparams to experiment directory.
-  with tf.gfile.GFile(run_dir + '/hparams', mode='w') as f:
-    f.write(hparams)#.to_proto().SerializeToString())
+  # with tf.gfile.GFile(run_dir + '/hparams', mode='w') as f:
+  #   f.write(hparams)#.to_proto().SerializeToString())
 
   tf.logging.info('Starting job.')
   tf.logging.info('Hyperparameters')
