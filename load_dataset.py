@@ -35,7 +35,7 @@ import tensorflow_datasets as tfds
 # Change the dataloader using recent version of tensorflow dataset
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train = tf.reshape(x_train, [x_train.shape[0],x_train.shape[1]**2])
-x_test = tf.reshape(x_train, [x_test.shape[0],x_test.shape[1]**2])
+x_test = tf.reshape(x_test, [x_test.shape[0],x_test.shape[1]**2])
 x_valid, x_train = x_train[:10000], x_train[10000:]
 y_valid, y_train = y_train[:10000], y_train[10000:]
 
