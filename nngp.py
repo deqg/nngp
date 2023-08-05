@@ -205,7 +205,6 @@ class NNGPKernel(object):
     with tf.name_scope("k_full"):
       cov_init = tf.matmul(
           input1, input2, transpose_b=True) / input1.shape[1] #.value
-      print(cov_init.shape, input1.shape, input2.shape)
       
       self.k_diag(input1)
       q_aa_init = self.layer_qaa_dict[0]
@@ -237,9 +236,6 @@ class NNGPKernel(object):
                                               z=self.qab_grid,
                                               xp=q_aa,
                                               yp=corr_flat_batch)
-                  print(corr_flat_batch.shape)
-                  print(q_ab.shape)
-                  print(cov_init_batch.shape)
                   q_ab = self.weight_var * q_ab + self.bias_var * cov_init_batch #ADD cov(X,X')
                   corr_flat_batch = q_ab / self.layer_qaa_dict[l + 1][0]
 
