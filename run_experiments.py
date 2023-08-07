@@ -50,7 +50,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('hparams', '',
                     'Comma separated list of name=value hyperparameter pairs to'
                     'override the default setting.')
-flags.DEFINE_string('experiment_dir', '/tmp/nngp',
+flags.DEFINE_string('experiment_dir', './tmp/nngp',
                     'Directory to put the experiment results.')
 flags.DEFINE_string('grid_path', './grid_data',
                     'Directory to put or find the training data.')
