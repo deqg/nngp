@@ -20,14 +20,14 @@ class ImplicitLayer(nn.Module):
         self.Flatten = nn.Flatten()
         # first layber
         self.input = nn.Linear(input_features, width, bias=False)
-        init.normal_(self.input.weight, mean=0, std=sigma_u/sqrt(input_features))
+        init.normal_(self.input.weight, mean=0, std=sigma_u/sqrt(input_features)) # initialization of U
         
         # implicit layer
         self.implicit = nn.Linear(width, width, bias=False)
-        init.normal_(self.implicit.weight, mean=0, std=sigma_u/sqrt(width))
+        init.normal_(self.implicit.weight, mean=0, std=sigma_w/sqrt(width)) # initialization of W
         
         # output layer
-        self.output = nn.Linear(width, output_features, bias=False)
+        self.output = nn.Linear(width, output_features, bias=False) # output layer, default initialization
         # set hyper-parameters
         self.input_features = input_features
         self.width = width
@@ -155,9 +155,6 @@ if __name__ == "__main__":
     test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
         torch.manual_seed(0)
     sigma_w = 0.6
-    train_err, train_losse, opn, test_err, test_losse, grad_B, grad_A, grad_W = train(sigma_w, input_dim, width, out_dim, train_data, test_data, lr)
-    train_errs.append(train_err), train_losses.append(train_losse), opns.append(opn)
-    test_errs.append(test_err), test_losses.append(test_losse)
-    print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
+    model = input_features, width, output_features = 1, act = torch.tanh, sigma_w = 0.6, sigma_u = 1.0, tol = None, max_iter=50, outlayer=True):
 
 
