@@ -32,7 +32,7 @@ class ImplicitLayer(nn.Module):
         # output layer
         self.output = nn.Linear(width, output_features, bias=False) # output layer, default initialization
 
-        init.normal_(self.output.weight, mean=0, std=1./sqrt(input_features)) # initialization of W
+        init.normal_(self.output.weight, mean=0, std=1./sqrt(width)) # initialization of W
         # set hyper-parameters
         self.input_features = input_features
         self.width = width
