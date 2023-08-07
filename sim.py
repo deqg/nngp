@@ -10,7 +10,7 @@ import torch.optim as optim
 import pandas as pd
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 import argparse
-
+import tensorflow.compat.v1 as tf
 ## Define the implicit model 
 ## params:
 ##    sigma_w: variance of W, default 0.6
@@ -92,7 +92,7 @@ def epoch(loader, model, opt=None, monitor=None):
 
 
 # need to create a method to take width as dataset dim, implicit layers, max iteration, output dim
-def train(model,input_dim, width, out_dim, train_data, test_data, lr, max_iter=1000):
+def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr, max_iter=10000):
     # model = nn.Sequential(nn.Flatten(),
     #     nn.Linear(input_dim, width, bias=False),
     #     reluImplicitLayer(width, gamma = gamma, max_iter=100),
@@ -149,32 +149,46 @@ class training_set(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return [self.X[idx], self.Y[idx]]    # return list of batch data [data, labels]
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size',type=int,default=100)
-    parser.add_argument('--sigma_w',type=float,default=0.6)
-    parser.add_argument('--sigma_u',type=float,default=1.0)
-    parser.add_argument('--act',type=str,default='relu')
-    parser.add_argument('--width',type=int,default=1000)
-    parser.add_argument('--depth',type=int,default=30)
-    parser.add_argument('--lr',type=int,default=0.01)
-    parser.add_argument('--num_train',type=int,default=100)
-    args = parser.parse_args()
-
-    batch_size = args.batch_size
-    num_train = args.num_train
-    sigma_w = args.sigma_w
-    sigma_u = args.sigma_u
-    width = args.width
-    depth = args.depth
-    lr = args.lr
-    if args.act=='relu':
+for _ in range(1):
+    flags = tf.app.flags
+    FLAGS = flags.FLAGS
+    flags.DEFINE_integer('num_train', 1000, 'Number of training data.')
+    flags.DEFINE_integer('batch_size',100,"ba")
+    flags.DEFINE_float('sigma_w',0.6,"sigma_w")
+    flags.DEFINE_float('sigma_u',1.0,"sigma_u")
+    flags.DEFINE_integer('width',1000,"width")
+    flags.DEFINE_integer('depth',30,"depth")
+    flags.DEFINE_float('lr',0.01,"lr")
+    flags.DEFINE_integer('epochs',10000,"epochs")
+    flags.DEFINE_string('act','tanh',"act")
+    #parser = argparse.ArgumentParser()
+def main(args):
+    #parser.add_argument('--batch_size',type=int,default=100)
+    #parser.add_argument('--sigma_w',type=float,default=0.6)
+    #parser.add_argument('--sigma_u',type=float,default=1.0)
+    #parser.add_argument('--act',type=str,default='relu')
+    #parser.add_argument('--width',type=int,default=1000)
+    #parser.add_argument('--depth',type=int,default=30)
+    #parser.add_argument('--lr',type=int,default=0.01)
+    #parser.add_argument('--num_train',type=int,default=100)
+    #parser.add_argument('--epochs',type=int,default=10000)
+    #args = parser.parse_args()
+    
+    batch_size = FLAGS.batch_size
+    num_train = FLAGS.num_train
+    sigma_w = FLAGS.sigma_w
+    sigma_u = FLAGS.sigma_u
+    width = FLAGS.width
+    depth = FLAGS.depth
+    lr = FLAGS.lr
+    epochs = FLAGS.epochs
+    if FLAGS.act=='relu':
         act = torch.relu
-    elif args.act=='tanh':
+    elif FLAGS.act=='tanh':
         act = torch.tanh
     else:
         raise NotImplementedError
-
+    print(width)
 
     (train_image, train_label,
           valid_image, valid_label,
@@ -198,11 +212,12 @@ if __name__ == "__main__":
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
-    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_data, test_data, lr, max_iter=10)
+    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr, max_iter=epochs)
     print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
-    df = pd.DataFrame({"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u, "num_train":num_train, 'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W},index=[0])
+    df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W},index=[0])
     df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
 
     
-
+if __name__=='__main__':
+    tf.app.run(main)
