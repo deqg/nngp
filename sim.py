@@ -6,7 +6,9 @@ import torch.nn.init as init
 from math import sqrt
 from torch.utils.data import DataLoader
 from load_dataset import load_mnist
-
+import torch.optim as optim
+import pandas as pd
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ## Define the implicit model 
 ## params:
@@ -28,6 +30,8 @@ class ImplicitLayer(nn.Module):
         
         # output layer
         self.output = nn.Linear(width, output_features, bias=False) # output layer, default initialization
+
+        init.normal_(self.output.weight, mean=0, std=1./sqrt(output_features)) # initialization of W
         # set hyper-parameters
         self.input_features = input_features
         self.width = width
@@ -46,7 +50,7 @@ class ImplicitLayer(nn.Module):
         # x = F.relu(self.input(x))
         ux = self.input(x)
         # initialize output z to be zero
-        z = torch.zeros_like(x)
+        z = torch.zeros_like(ux)
         self.iterations = 0 
 
         while self.iterations < self.max_iter:
@@ -69,6 +73,7 @@ def epoch(loader, model, opt=None, monitor=None):
     model.eval() if opt is None else model.train()
     for X,y in loader:
         X,y = X.to(device), y.to(device)
+
         yp = model(X)
         # loss = nn.CrossEntropyLoss()(yp,y)
         # one_hot = torch.nn.functional.one_hot(y, yp.shape[1]) #already onehot no need
@@ -77,8 +82,8 @@ def epoch(loader, model, opt=None, monitor=None):
             opt.zero_grad()
             loss.backward()
             opt.step()
-        
-        total_err += (yp.max(dim=1)[1] != y).sum().item()
+        total_err += (yp.max(dim=1)[1] != y.max(dim=1)[1]).sum().item() 
+        #total_err += (yp.max(dim=1)[1] != y).sum().item()
         total_loss += loss.item() * X.shape[0]
         if monitor is not None:
             total_monitor += monitor(model)
@@ -86,15 +91,16 @@ def epoch(loader, model, opt=None, monitor=None):
 
 
 # need to create a method to take width as dataset dim, implicit layers, max iteration, output dim
-def train(model,gamma, input_dim, width, out_dim, train_data, test_data, lr, max_iter=1000):
+def train(model,input_dim, width, out_dim, train_data, test_data, lr, max_iter=10000):
     # model = nn.Sequential(nn.Flatten(),
     #     nn.Linear(input_dim, width, bias=False),
     #     reluImplicitLayer(width, gamma = gamma, max_iter=100),
     #     nn.Linear(width, out_dim, bias=False)).to(device)
 
     opn = torch.linalg.norm(model.implicit.weight,2).item()  #model.gamma*torch.linalg.norm(model.implicit.implicit.weight,2).item()
-    print(f"Implicit: gamma={gamma} | width={width} | lr={lr} | opn={opn:.4f}")
-    print(f"Fixed: norm_W={torch.linalg.norm(model.implicit.input.weight):.4f} | norm_B={torch.linalg.norm(model.output.weight):.4f}")
+    #print(f"Implicit: gamma={gamma} | width={width} | lr={lr} | opn={opn:.4f}")
+    print(f"width={width} | lr={lr} | opn={opn:.4f}")
+    print(f"Fixed: norm_W={torch.linalg.norm(model.input.weight):.4f} | norm_B={torch.linalg.norm(model.output.weight):.4f}")
 
     # fix the first and output layer unchanged
     for name, param in model.named_parameters():
@@ -116,14 +122,14 @@ def train(model,gamma, input_dim, width, out_dim, train_data, test_data, lr, max
         train_err, train_loss, opn = epoch(train_dataloader, model, opt, \
             lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
         test_err, test_loss, _ = epoch(test_dataloader, model)
-        print(f"{i}: Forward: {model.implicit.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
+        print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
         train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
         test_errs.append(test_err), test_losses.append(test_loss)
 
     grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
     grad_A = torch.norm(model.implicit.weight.grad,p='fro')
-    grad_W = torch.norm(model.input.weight.grad,p='fro') if model.implicit.input.weight.grad != None else 0.0
+    grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
 
     # train_losses = [loss/train_losses[0] for loss in train_losses]
     # test_losses = [loss/test_losses[0] for loss in test_losses]
@@ -143,19 +149,43 @@ class training_set(torch.utils.data.Dataset):
         return [self.X[idx], self.Y[idx]]    # return list of batch data [data, labels]
 
 if __name__ == "__main__":
-    batch_size = 100
-    num_train = 100
+    batch_size = 500
+    num_train = 500
+    act = torch.relu
+    sigma_w = 0.5
+    sigma_u = 1.0
+    width = 500
+    depth = 10
+    lr = 0.02
+
 
     (train_image, train_label,
           valid_image, valid_label,
           test_image, test_label) =  load_mnist(num_train=num_train)
+    train_image =torch.from_numpy(train_image)
+    train_lanbel = torch.from_numpy(train_label)
+    test_image = torch.from_numpy(test_image)
+    test_label = torch.from_numpy(test_label)
+    train_image =  (train_image-train_image.mean(-1,keepdims=True))/train_image.std(-1,keepdims=True)
+    test_image =  (test_image-test_image.mean(-1,keepdims=True))/test_image.std(-1,keepdims=True)
     train_data = training_set(train_image, train_label)
     test_data = training_set(test_image,test_label)
     train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
     sigma_w = 0.6
     input_dim = train_image.shape[-1]
-    model = ImplicitLayer()
-    print(train_image.shape)
+    output_dim = train_label.shape[-1]
+    model = ImplicitLayer(input_dim, width, output_dim,act,sigma_w,sigma_u,max_iter = depth)
+    model.to(device)
+    torch.manual_seed(0)
+    print(model(train_image.to(device)).shape)
+    print(train_label.shape)
+    
+    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_data, test_data, lr)
+    print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
+    df = pd.DataFrame({"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u, "num_train":num_train, 'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W})
+    df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
+
+    
 
