@@ -236,6 +236,7 @@ class NNGPKernel(object):
 
 
               for l in xrange(self.depth):
+                print(l)
                 with tf.name_scope("layer_%d" % l):
                   q_aa = self.layer_qaa_dict[l]
                   q_ab = interp.interp_lin_2d(x=self.var_aa_grid,
