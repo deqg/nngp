@@ -221,7 +221,6 @@ class NNGPKernel(object):
           # print(q_ab.shape)
           # print(input1.shape)
           for b_x in range(batch_count):
-            print(b_x)
             # input1_batch = input1#[batch_size * b_x : batch_size * (b_x + 1), :] ## Not sure whether the code works when batch_count >1
             # input2_batch = input2#[batch_size * b_x : batch_size * (b_x + 1), :]
             with tf.name_scope("batch_%d" % b_x):
@@ -236,7 +235,6 @@ class NNGPKernel(object):
 
 
               for l in xrange(self.depth):
-                print(l)
                 with tf.name_scope("layer_%d" % l):
                   q_aa = self.layer_qaa_dict[l]
                   q_ab = interp.interp_lin_2d(x=self.var_aa_grid,
