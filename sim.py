@@ -153,8 +153,9 @@ if __name__ == "__main__":
     test_data = training_set(test_image,test_label)
     train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
-        torch.manual_seed(0)
     sigma_w = 0.6
-    model = input_features, width, output_features = 1, act = torch.tanh, sigma_w = 0.6, sigma_u = 1.0, tol = None, max_iter=50, outlayer=True):
+    input_dim = train_image.shape[-1]
+    model = ImplicitLayer()
+    print(train_image.shape)
 
 
