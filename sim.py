@@ -9,6 +9,7 @@ from load_dataset import load_mnist
 import torch.optim as optim
 import pandas as pd
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+import argparse
 
 ## Define the implicit model 
 ## params:
@@ -31,7 +32,7 @@ class ImplicitLayer(nn.Module):
         # output layer
         self.output = nn.Linear(width, output_features, bias=False) # output layer, default initialization
 
-        init.normal_(self.output.weight, mean=0, std=1./sqrt(output_features)) # initialization of W
+        init.normal_(self.output.weight, mean=0, std=1./sqrt(input_features)) # initialization of W
         # set hyper-parameters
         self.input_features = input_features
         self.width = width
@@ -91,7 +92,7 @@ def epoch(loader, model, opt=None, monitor=None):
 
 
 # need to create a method to take width as dataset dim, implicit layers, max iteration, output dim
-def train(model,input_dim, width, out_dim, train_data, test_data, lr, max_iter=10000):
+def train(model,input_dim, width, out_dim, train_data, test_data, lr, max_iter=1000):
     # model = nn.Sequential(nn.Flatten(),
     #     nn.Linear(input_dim, width, bias=False),
     #     reluImplicitLayer(width, gamma = gamma, max_iter=100),
@@ -122,19 +123,19 @@ def train(model,input_dim, width, out_dim, train_data, test_data, lr, max_iter=1
         train_err, train_loss, opn = epoch(train_dataloader, model, opt, \
             lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
         test_err, test_loss, _ = epoch(test_dataloader, model)
-        print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
-              f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
-        train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
-        test_errs.append(test_err), test_losses.append(test_loss)
+        #print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
+        #      f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
+        #train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
+        #test_errs.append(test_err), test_losses.append(test_loss)
 
     grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
-    grad_A = torch.norm(model.implicit.weight.grad,p='fro')
+    grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
     grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
 
     # train_losses = [loss/train_losses[0] for loss in train_losses]
     # test_losses = [loss/test_losses[0] for loss in test_losses]
 
-    return train_errs, train_losses, opns, test_errs, test_losses, grad_B, grad_A, grad_W
+    return train_err, train_loss, opn, test_err, test_loss, grad_B, grad_A, grad_W
 
 #for constructing dataloader
 class training_set(torch.utils.data.Dataset):
@@ -149,14 +150,30 @@ class training_set(torch.utils.data.Dataset):
         return [self.X[idx], self.Y[idx]]    # return list of batch data [data, labels]
 
 if __name__ == "__main__":
-    batch_size = 500
-    num_train = 500
-    act = torch.relu
-    sigma_w = 0.5
-    sigma_u = 1.0
-    width = 500
-    depth = 10
-    lr = 0.02
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch_size',type=int,default=100)
+    parser.add_argument('--sigma_w',type=float,default=0.6)
+    parser.add_argument('--sigma_u',type=float,default=1.0)
+    parser.add_argument('--act',type=str,default='relu')
+    parser.add_argument('--width',type=int,default=1000)
+    parser.add_argument('--depth',type=int,default=30)
+    parser.add_argument('--lr',type=int,default=0.01)
+    parser.add_argument('--num_train',type=int,default=100)
+    args = parser.parse_args()
+
+    batch_size = args.batch_size
+    num_train = args.num_train
+    sigma_w = args.sigma_w
+    sigma_u = args.sigma_u
+    width = args.width
+    depth = args.depth
+    lr = args.lr
+    if args.act=='relu':
+        act = torch.relu
+    elif args.act=='tanh':
+        act = torch.tanh
+    else:
+        raise NotImplementedError
 
 
     (train_image, train_label,
@@ -181,9 +198,9 @@ if __name__ == "__main__":
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
-    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_data, test_data, lr)
+    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_data, test_data, lr, max_iter=10)
     print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
-    df = pd.DataFrame({"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u, "num_train":num_train, 'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W})
+    df = pd.DataFrame({"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u, "num_train":num_train, 'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W},index=[0])
     df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
 
