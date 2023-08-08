@@ -8,3 +8,5 @@ y
 y.pub
 token
 data/
+*.png
+plot.py
