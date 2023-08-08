@@ -115,7 +115,7 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     for name, param in model.named_parameters():
         print(f"{name}, {param.requires_grad}")
 
-    opt = optim.SGD(model.parameters(), lr=lr)
+    opt = optim.Adam(model.parameters(), lr=lr)
     
     train_errs, train_losses, opns = [], [], []
     test_errs, test_losses = [], []
@@ -129,7 +129,8 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
         #train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
         #test_errs.append(test_err), test_losses.append(test_loss)
-
+        if train_err < 1e-4:
+            break
     grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
     grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
     grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
