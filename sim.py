@@ -1,4 +1,5 @@
 import torch
+torch.manual_seed(0)
 import torch.nn as nn
 import torch.nn.functional as F # for relu
 import torch.linalg
@@ -119,7 +120,6 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     train_errs, train_losses, opns = [], [], []
     test_errs, test_losses = [], []
     for i in range(max_iter):
-        print(i)
 
         train_err, train_loss, opn = epoch(train_dataloader, model, opt, \
             lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
@@ -210,7 +210,6 @@ def main(args):
     output_dim = train_label.shape[-1]
     model = ImplicitLayer(input_dim, width, output_dim,act,sigma_w,sigma_u,max_iter = depth)
     model.to(device)
-    torch.manual_seed(0)
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
