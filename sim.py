@@ -104,12 +104,12 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     print(f"Fixed: norm_W={torch.linalg.norm(model.input.weight):.4f} | norm_B={torch.linalg.norm(model.output.weight):.4f}")
 
     # fix the first and output layer unchanged
-    for name, param in model.named_parameters():
-        if name == "input.weight":
-            param.requires_grad = False
+    #for name, param in model.named_parameters():
+    #    if name == "input.weight":
+    #        param.requires_grad = False
 
-        if name == "output.weight":
-            param.requires_grad = False
+    #    if name == "output.weight":
+    #        param.requires_grad = False
 
     for name, param in model.named_parameters():
         print(f"{name}, {param.requires_grad}")
@@ -119,6 +119,7 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     train_errs, train_losses, opns = [], [], []
     test_errs, test_losses = [], []
     for i in range(max_iter):
+        print(i)
 
         train_err, train_loss, opn = epoch(train_dataloader, model, opt, \
             lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
@@ -159,7 +160,7 @@ for _ in range(1):
     flags.DEFINE_float('sigma_u',1.0,"sigma_u")
     flags.DEFINE_integer('width',1000,"width")
     flags.DEFINE_integer('depth',30,"depth")
-    flags.DEFINE_float('lr',0.01,"lr")
+    flags.DEFINE_float('lr',0.05,"lr")
     flags.DEFINE_integer('epochs',10000,"epochs")
     flags.DEFINE_string('act','tanh',"act")
     #parser = argparse.ArgumentParser()

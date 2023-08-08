@@ -1,4 +1,5 @@
 import torch
+torch.manual_seed(0)
 import torch.nn as nn
 import torch.nn.functional as F # for relu
 import torch.linalg
@@ -54,7 +55,7 @@ class ImplicitLayer(nn.Module):
         ux = self.input(x)
         # initialize output z to be zero
         z = torch.zeros_like(ux)
-        z = self.act(self.preinput(x))
+        #z = self.act(self.preinput(x))
         self.iterations = 0 
         while self.iterations < self.max_iter:
             z_next = self.act(self.implicit(z) + ux) 
@@ -64,6 +65,7 @@ class ImplicitLayer(nn.Module):
             if self.tol is not None:
               if self.err < self.tol:
                   break
+     
         if self.outlayer:
           return self.output(z)
         else:
@@ -106,14 +108,14 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     print(f"Fixed: norm_W={torch.linalg.norm(model.input.weight):.4f} | norm_B={torch.linalg.norm(model.output.weight):.4f}")
 
     # fix the first and output layer unchanged
-    for name, param in model.named_parameters():
-        if name == "input.weight":
-            param.requires_grad = False
+    #for name, param in model.named_parameters():
+    #    if name == "input.weight":
+    #        param.requires_grad = False
 
-        if name == "output.weight":
-            param.requires_grad = False
-        if name=="preinput.weight":
-            param.requires_grad = False
+    #    if name == "output.weight":
+    #        param.requires_grad = False
+    #    if name=="preinput.weight":
+    #        param.requires_grad = False
 
     for name, param in model.named_parameters():
         print(f"{name}, {param.requires_grad}")
@@ -129,13 +131,13 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
         if i%100==0:
             print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
+        #print(model.input.weight.norm().item(), model.output.weight.norm().item(), model.implicit.weight.norm().item())
         #train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
         #test_errs.append(test_err), test_losses.append(test_loss)
 
     grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
     grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
     grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
-
     # train_losses = [loss/train_losses[0] for loss in train_losses]
     # test_losses = [loss/test_losses[0] for loss in test_losses]
 
@@ -213,7 +215,6 @@ def main(args):
     output_dim = train_label.shape[-1]
     model = ImplicitLayer(input_dim, width, output_dim,act,sigma_w,sigma_u,max_iter = depth)
     model.to(device)
-    torch.manual_seed(0)
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
