@@ -112,7 +112,7 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
             #lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
         test_err, test_loss, _ = epoch(test_dataloader, model)
         if i%100==0:
-            print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
+            print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f} " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
 
     return train_err, train_loss, test_err, test_loss
