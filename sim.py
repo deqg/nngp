@@ -203,6 +203,7 @@ def main(args):
     train_err, train_losses, test_err, test_losses = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr=lr, max_iter=epochs)
     #print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
     df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "test_err":test_err, "test_losses":test_losses},index=[0]) #, "gradA":grad_A, "gradW":grad_W},index=[0])
+    print(df)
     df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
 
