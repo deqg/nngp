@@ -74,7 +74,6 @@ def epoch(loader, model, opt=None, monitor=None):
     total_loss, total_err, total_monitor = 0.,0.,0.
     model.eval() if opt is None else model.train()
     for X,y in loader:
-        print(X.shape)
         X,y = X.to(device), y.to(device)
         yp = model(X)
         loss = criterion(yp,y)
