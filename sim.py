@@ -75,10 +75,7 @@ def epoch(loader, model, opt=None, monitor=None):
     model.eval() if opt is None else model.train()
     for X,y in loader:
         X,y = X.to(device), y.to(device)
-
         yp = model(X)
-        # loss = nn.CrossEntropyLoss()(yp,y)
-        # one_hot = torch.nn.functional.one_hot(y, yp.shape[1]) #already onehot no need
         loss = criterion(yp,y)
         if opt:
             opt.zero_grad()
@@ -94,15 +91,6 @@ def epoch(loader, model, opt=None, monitor=None):
 
 # need to create a method to take width as dataset dim, implicit layers, max iteration, output dim
 def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr, max_iter=10000):
-    # model = nn.Sequential(nn.Flatten(),
-    #     nn.Linear(input_dim, width, bias=False),
-    #     reluImplicitLayer(width, gamma = gamma, max_iter=100),
-    #     nn.Linear(width, out_dim, bias=False)).to(device)
-
-    opn = torch.linalg.norm(model.implicit.weight,2).item()  #model.gamma*torch.linalg.norm(model.implicit.implicit.weight,2).item()
-    #print(f"Implicit: gamma={gamma} | width={width} | lr={lr} | opn={opn:.4f}")
-    print(f"width={width} | lr={lr} | opn={opn:.4f}")
-    print(f"Fixed: norm_W={torch.linalg.norm(model.input.weight):.4f} | norm_B={torch.linalg.norm(model.output.weight):.4f}")
 
     # fix the first and output layer unchanged
     #for name, param in model.named_parameters():
@@ -112,35 +100,23 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     #    if name == "output.weight":
     #        param.requires_grad = False
 
-    for name, param in model.named_parameters():
-        print(f"{name}, {param.requires_grad}")
+    # for name, param in model.named_parameters():
+    #     print(f"{name}, {param.requires_grad}")
 
     opt = optim.Adam(model.parameters(), lr=lr)
     
-    train_errs, train_losses, opns = [], [], []
-    test_errs, test_losses = [], []
+    # train_errs, train_losses = [], [], []
+    # test_errs, test_losses = [], []
     for i in range(max_iter):
-
-        train_err, train_loss, opn = epoch(train_dataloader, model, opt, \
-            lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
+        train_err, train_loss, _ = epoch(train_dataloader, model, opt)#, \
+            #lambda m:  torch.linalg.norm(m.implicit.weight,2).item())
         test_err, test_loss, _ = epoch(test_dataloader, model)
         if i%100==0:
             print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
-        #val_err, val_loss,_=epoch(val_dataloader,model)
-        #train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
-        #test_errs.append(test_err), test_losses.append(test_loss)
-        #if train_err < 1e-4:
-        #    break
-    #grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
-    #grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
-    #grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
 
-    # train_losses = [loss/train_losses[0] for loss in train_losses]
-    # test_losses = [loss/test_losses[0] for loss in test_losses]
-
-    return train_err, train_loss, opn, test_err, test_loss#, grad_B, grad_A, grad_W
-
+    return train_err, train_loss, opn, test_err, test_loss
+    
 #for constructing dataloader
 class training_set(torch.utils.data.Dataset):
     def __init__(self,X,Y):
