@@ -103,7 +103,7 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
     # for name, param in model.named_parameters():
     #     print(f"{name}, {param.requires_grad}")
 
-    opt = optim.Adam(model.parameters(), lr=lr)
+    opt = optim.SGD(model.parameters(), lr=lr)
     
     # train_errs, train_losses = [], [], []
     # test_errs, test_losses = [], []
