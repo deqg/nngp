@@ -127,18 +127,19 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
         if i%100==0:
             print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
+        #val_err, val_loss,_=epoch(val_dataloader,model)
         #train_errs.append(train_err), train_losses.append(train_loss), opns.append(opn)
         #test_errs.append(test_err), test_losses.append(test_loss)
         #if train_err < 1e-4:
         #    break
-    grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
-    grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
-    grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
+    #grad_B = torch.norm(model.output.weight.grad,p='fro') if model.output.weight.grad != None else 0.0
+    #grad_A = torch.norm(model.implicit.weight.grad,p='fro').item()
+    #grad_W = torch.norm(model.input.weight.grad,p='fro') if model.input.weight.grad != None else 0.0
 
     # train_losses = [loss/train_losses[0] for loss in train_losses]
     # test_losses = [loss/test_losses[0] for loss in test_losses]
 
-    return train_err, train_loss, opn, test_err, test_loss, grad_B, grad_A, grad_W
+    return train_err, train_loss, opn, test_err, test_loss#, grad_B, grad_A, grad_W
 
 #for constructing dataloader
 class training_set(torch.utils.data.Dataset):
@@ -197,15 +198,24 @@ def main(args):
           valid_image, valid_label,
           test_image, test_label) =  load_mnist(num_train=num_train)
     train_image =torch.from_numpy(train_image)
-    train_lanbel = torch.from_numpy(train_label)
+    train_label = torch.from_numpy(train_label)
     test_image = torch.from_numpy(test_image)
     test_label = torch.from_numpy(test_label)
+    val_image = torch.from_numpy(valid_image)
+    val_label = torch.from_numpy(valid_label)
+    
+    
     train_image =  (train_image-train_image.mean(-1,keepdims=True))/train_image.std(-1,keepdims=True)
     test_image =  (test_image-test_image.mean(-1,keepdims=True))/test_image.std(-1,keepdims=True)
+    val_image =  (val_image-val_image.mean(-1,keepdims=True))/val_image.std(-1,keepdims=True)
     train_data = training_set(train_image, train_label)
     test_data = training_set(test_image,test_label)
+    val_data = training_set(val_image,val_label)
+
     train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+    
+    val_dataloader = DataLoader(val_data, batch_size=batch_size, shuffle=True)
     sigma_w = 0.6
     input_dim = train_image.shape[-1]
     output_dim = train_label.shape[-1]
@@ -214,9 +224,9 @@ def main(args):
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
-    train_err, train_losses, opn, test_err, test_losses, grad_B, grad_A, grad_W = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr, max_iter=epochs)
-    print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
-    df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses, "gradA":grad_A, "gradW":grad_W},index=[0])
+    train_err, train_losses, opn, test_err, test_losses = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr=lr, max_iter=epochs)
+    #print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
+    df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses},index=[0]) #, "gradA":grad_A, "gradW":grad_W},index=[0])
     df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
 
