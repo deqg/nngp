@@ -138,7 +138,7 @@ for _ in range(1):
     flags.DEFINE_float('sigma_u',1.0,"sigma_u")
     flags.DEFINE_integer('width',1000,"width")
     flags.DEFINE_integer('depth',30,"depth")
-    flags.DEFINE_float('lr',0.05,"lr")
+    flags.DEFINE_float('lr',0.01,"lr")
     flags.DEFINE_integer('epochs',10000,"epochs")
     flags.DEFINE_string('act','tanh',"act")
     #parser = argparse.ArgumentParser()
