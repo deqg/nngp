@@ -115,7 +115,7 @@ def train(model,input_dim, width, out_dim, train_dataloader, test_dataloader, lr
             print(f"{i}: Forward: {model.iterations} | " + f"Train Error: {train_err:.4f}, Loss: {train_loss:.4f}, Operator norm: {opn:.4f} | " +
               f"Test Error: {test_err:.4f}, Loss: {test_loss:.4f}")
 
-    return train_err, train_loss, opn, test_err, test_loss
+    return train_err, train_loss, test_err, test_loss
     
 #for constructing dataloader
 class training_set(torch.utils.data.Dataset):
@@ -200,9 +200,9 @@ def main(args):
     print(model(train_image.to(device)).shape)
     print(train_label.shape)
     
-    train_err, train_losses, opn, test_err, test_losses = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr=lr, max_iter=epochs)
+    train_err, train_losses, test_err, test_losses = train(model, input_dim, width, output_dim, train_dataloader, test_dataloader, lr=lr, max_iter=epochs)
     #print(f"grad at the end: grad_B={grad_B:.4f}, grad_A={grad_A:.4f}, grad_W={grad_W:.4f}")
-    df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "opn":opn, "test_err":test_err, "test_losses":test_losses},index=[0]) #, "gradA":grad_A, "gradW":grad_W},index=[0])
+    df = pd.DataFrame({'num_train':num_train,"width":width,"depth":depth,"sigma_w":sigma_w,"sigma_u":sigma_u,  'train_err': train_err, 'train_losses': train_losses, "test_err":test_err, "test_losses":test_losses},index=[0]) #, "gradA":grad_A, "gradW":grad_W},index=[0])
     df.to_csv('tmp/sim/results.csv', mode='a', header=False)
 
 
